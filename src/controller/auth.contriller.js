@@ -20,10 +20,14 @@ exports.register = async (req, res) => {
     name,username,email,role,password:hashPassword
   })
   const token = jwt.sign({id:user._id,role:user.role},process.env.JWT_SECRET)
+
+  const origin = req.headers.origin || "";
+  const isLocal = origin.includes("localhost");
+
   res.cookie("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production", 
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: !isLocal, 
+    sameSite: isLocal ? "lax" : "none",
   }).status(201).json({
     message:"User registered successfully",
     user:{
@@ -61,10 +65,13 @@ exports.login = async (req, res) => {
       { expiresIn: "1d" }
     );
 
+    const origin = req.headers.origin || "";
+    const isLocal = origin.includes("localhost");
+
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", 
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: !isLocal, 
+      sameSite: isLocal ? "lax" : "none",
     });
 
     res.status(200).json({
@@ -187,10 +194,13 @@ exports.resetPassword = async (req, res) => {
 
 
 exports.logout = (req, res) => {
+  const origin = req.headers.origin || "";
+  const isLocal = origin.includes("localhost");
+
   res.cookie("token", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production", 
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: !isLocal, 
+    sameSite: isLocal ? "lax" : "none",
     expires: new Date(0), 
   });
 
