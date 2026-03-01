@@ -10,7 +10,9 @@ const onlineUsers = new Map();
 const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: true,
+      origin: function (origin, callback) {
+        callback(null, true);
+      },
       credentials: true,
     },
   });

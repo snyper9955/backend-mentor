@@ -8,13 +8,18 @@ const activity = require("./src/routes/activity");
 
 const app = express();
 
+// ✅ Trust Proxy for Render HTTPS Load Balancer
+app.set("trust proxy", 1);
+
 // ✅ CORS
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: function (origin, callback) {
+    callback(null, true);
+  },
+  credentials: true,
+};
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // ✅ Middleware
 app.use(express.json());
