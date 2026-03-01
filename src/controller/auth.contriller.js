@@ -30,6 +30,7 @@ exports.register = async (req, res) => {
     sameSite: isLocal ? "lax" : "none",
   }).status(201).json({
     message:"User registered successfully",
+    token, // ✅ Pass token for LocalStorage fallback
     user:{
         id:user._id,
         name:user.name,
@@ -76,6 +77,7 @@ exports.login = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
+      token, // ✅ Pass token for LocalStorage fallback
       user: {
         id: user._id,
         name: user.name,
