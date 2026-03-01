@@ -19,8 +19,12 @@ exports.register = async (req, res) => {
   const user= await User.create({
     name,username,email,role,password:hashPassword
   })
-  const token =jwt.sign({id:user._id,role:user.role},process.env.JWT_SECRET)
-  res.cookie("token",token).status(201).json({
+  const token = jwt.sign({id:user._id,role:user.role},process.env.JWT_SECRET)
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,      // 🔥 Required for cross-origin (Render/Vercel)
+    sameSite: "none",  // 🔥 Required for cross-origin
+  }).status(201).json({
     message:"User registered successfully",
     user:{
         id:user._id,
@@ -59,8 +63,8 @@ exports.login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // true in production (HTTPS)
-      sameSite: "lax",
+      secure: true,      // 🔥 Required for cross-origin
+      sameSite: "none",  // 🔥 Required for cross-origin 
     });
 
     res.status(200).json({
@@ -111,7 +115,8 @@ exports.forgotPassword = async (req, res) => {
 
     await user.save();
 
-    const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetURL = `${frontendUrl}/reset-password/${resetToken}`;
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -184,6 +189,8 @@ exports.resetPassword = async (req, res) => {
 exports.logout = (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
+    secure: true,     
+    sameSite: "none",
     expires: new Date(0), 
   });
 
